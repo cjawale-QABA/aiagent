@@ -17,7 +17,16 @@ def run_python_file(working_directory: str, file_path: str, args=None):
     command = ["python", abs_file_path]
     if args:
         command.extend(args)
-    result = subprocess.run(command, cwd=abs_working_dir, text=True, capture_output=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=30)
+    result = subprocess.run(command, cwd=abs_working_dir, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=30)
+    output = ""
     if result.returncode != 0:
-        return f'Process exited with code {result.returncode}\nError: "{file_path}" failed to run with error:\n{result.stdout}'
-    return result
+        output += f'Process exited with code {result.returncode}\n'
+    if result.stdout is None and result.stderr is None:
+        output += f'Error: "{file_path}" produced no output.'
+    else:
+        output += f'STDOUT: {result.stdout}' if result.stdout is not None else f'STDERR: {result.stderr}'
+    return output
+
+
+
+# print(run_python_file("calculator", "lorem.txt"))
