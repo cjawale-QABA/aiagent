@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import subprocess
 import sys
+from google.genai import types
 
 load_dotenv()
 
@@ -29,4 +30,28 @@ def run_python_file(working_directory: str, file_path: str, args=None):
 
 
 
-# print(run_python_file("calculator", "lorem.txt"))
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Runs a Python file relative to the working directory",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Runs a specified Python file, relative to the working directory",
+            ),
+            "working_directory": types.Schema(
+                type=types.Type.STRING,
+                description="The base working directory of the tool. Use the python `os.getcwd()` command to retrieve it",
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                items=types.Schema(
+                    type=types.Type.STRING,
+                    description="Arguments to pass to the Python file",
+                ),
+            ),
+        },
+    ),
+)
+

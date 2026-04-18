@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from google.genai import types
 
 load_dotenv()
 MAX_CHARS = os.environ.get("MAX_CHARS")
@@ -20,6 +21,26 @@ def get_file_content(working_directory, file_path):
             content_file = full_file_content[:10000] + f'\n\n\n\n[...File "{file_path}" truncated at {MAX_CHARS} characters] \n'
             return content_file
         return full_file_content
+
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Retrieves the content of a specified file relative to the working directory",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="File path to retrieves the content from, relative to the working directory",
+            ),
+            "working_directory": types.Schema(
+                type=types.Type.STRING,
+                description="The base working directory of the tool. Use the python `os.getcwd()` command to retrieve it",
+            ),
+        },
+    ),
+)
+
 
 def main():
     result = get_file_content("calculator/", "pkg/does_not_exist.py")

@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from google.genai import types
 
 load_dotenv()
 def write_file(working_directory, file_path, content=""):
@@ -30,5 +31,25 @@ def write_file(working_directory, file_path, content=""):
         # print(f'Error: Failed to write to "{file_path}". {e}')
         return f'Error: Cannot write to "{file_path}".'
 
-# print(write_file("calculator/", "pkg/moretext.txt", "pkg/test.txt says Hello, World!"))
-# print(write_file("calculator", "/tmp/temp.txt", "this should not be allowed"))
+
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Writes content to a specified file relative to the working directory",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the file to write, relative to the working directory",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="Content to write in the specified file",
+            ),
+            "working_directory": types.Schema(
+                type=types.Type.STRING,
+                description="The base working directory of the tool. Use the python `os.getcwd()` command to retrieve it",
+            ),
+        },
+    ),
+)

@@ -1,4 +1,6 @@
 import os
+from google import genai
+from google.genai import types
 from py_compile import main
 
 def get_files_info(working_directory, directory="."):
@@ -27,7 +29,23 @@ def get_files_info(working_directory, directory="."):
     else:
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
 
-
+schema_get_files_info = types.FunctionDeclaration(
+    name="get_files_info",
+    description="Lists files in a specified directory relative to the working directory, providing file size and directory status",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "working_directory": types.Schema(
+                type=types.Type.STRING,
+                description="The base working directory of the tool. Use the python `os.getcwd()` command to retrieve it",
+            ),
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="Directory path to list files from, relative to the working directory (default is the working directory itself)",
+            ),
+        },
+    ),
+)
 
 def main():
     result = get_files_info("calculator/", "pkg")
