@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from prompts import system_prompt
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 
 
@@ -26,7 +26,7 @@ else:
             tools=[available_functions]
         ),
     )
-    
+
     if len(sys.argv) == 3:
         verbose_flag = True
     elif len(sys.argv) == 2:
@@ -34,19 +34,35 @@ else:
 
 def main():
     print("API: ", api_key)
+    function_calls = []
     try:
         if response.function_calls and len(response.function_calls) > 0:
             for function_call in response.function_calls:
-                print(f"Calling function: {function_call.name}({function_call.args})")
-        if verbose_flag:
-            if response.usage_metadata:
-                # print("Response metadata: ", response.usage_metadata)
-                print("prompt token: ", response.usage_metadata.prompt_token_count)
-                print("response token: ", response.usage_metadata.candidates_token_count)
-                print("Response: ", response.text)
-        else:
-            # print("Response: ", response.json())
-            print(response.text)
+                # print(f"Calling function")
+                function_result = call_function(function_call, verbose=verbose_flag)
+                # print(function_result)
+                if function_result.parts and len(function_result.parts) > 0:
+                    if type(function_result.parts[0].function_response) == types.FunctionResponse:
+                        if function_result.parts[0].function_response.response is not None:
+                            function_calls.append(function_result.parts[0])
+                            if verbose_flag:
+                                print(f"-> {function_result.parts[0].function_response.response['result']}")
+                        else:
+                            raise Exception("Function response is empty")
+                    else:
+                        raise Exception("Invalid function response format")
+                else:
+                    raise Exception("No function response parts found")
+                # 
+        # if verbose_flag:
+        #     if response.usage_metadata:
+        #         # print("Response metadata: ", response.usage_metadata)
+        #         print("prompt token: ", response.usage_metadata.prompt_token_count)
+        #         print("response token: ", response.usage_metadata.candidates_token_count)
+        #         print("Response: ", response.text)
+        # else:
+        #     # print("Response: ", response.json())
+        #     print(response.text)
     except RuntimeError as e:
         print("Error: ", e)
 
